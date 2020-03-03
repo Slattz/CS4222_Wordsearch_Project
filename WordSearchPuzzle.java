@@ -14,10 +14,146 @@ public class WordSearchPuzzle {
 
     private char[][] puzzle;
     private List<String> puzzleWords;
-    private List<WordExtraInfo> puzzleWordsInfo;
+    private List<WordExtraInfo> puzzleWordsInfo; //Change to Map in future so the words can be used as keys rather than dpeending on being in same index
+
+    //return true if word added successfully, false if can't fit / error
+    private boolean addWord(String word, String direction, int xPos, int yPos, WordExtraInfo extraInfo) {
+        int tempX = xPos, tempY = yPos, validSpaces = 0;
+
+        extraInfo.direction = direction;
+        switch (direction) { //switch case for the least amount of duped code
+            case "Right":
+            case "Left":
+                extraInfo.location.x = (direction.equals("Right") ? xPos+word.length() : xPos); //words going right are reversed earlier
+                extraInfo.location.y = yPos;
+
+                for (int i = 0; i < word.length(); i++) {
+                    if (puzzle[xPos][yPos+i] == '\0' || puzzle[xPos][yPos+i] == word.charAt(i)) {
+                        validSpaces++;
+                    }
+                }
+
+                if (validSpaces != word.length()) {
+                    System.out.printf("Left/Right: validSpaces (len: %d) != word.length() (len: %d) for word %s\n", validSpaces, word.length(), word);
+                    return false;
+                }
+
+                for (int i = 0; i < word.length(); i++) { //No need to validate spaces again as done above
+                    puzzle[xPos][yPos+i] = word.charAt(i);
+                }
+            return true;
+
+            case "Up":
+            case "Down":
+                extraInfo.location.x = xPos;
+                extraInfo.location.y = (direction.equals("Up") ? yPos+word.length() : yPos); //words going up are reversed earlier;
+
+                for (int i = 0; i < word.length(); i++) {
+                    if (puzzle[xPos+i][yPos] == '\0' || puzzle[xPos+i][yPos] == word.charAt(i)) {
+                        validSpaces++;
+                    }
+                }
+
+                if (validSpaces != word.length()) {
+                    System.out.printf("Up/Down: validSpaces (len: %d) != word.length() (len: %d) for word %s\n", validSpaces, word.length(), word);
+                    return false;
+                }
+
+                for (int i = 0; i < word.length(); i++) { //No need to validate spaces again as done above
+                    puzzle[xPos+i][yPos] = word.charAt(i);
+                }
+            return true;
+
+            case "Diagonal Left Down":
+            case "Diagonal Left Up":
+            case "Diagonal Right Down":
+            case "Diagonal Right Up":
+                System.out.println(direction + " Not Implemented! Return false for now!");
+            return false;
+
+            default:
+                System.out.println("Hit default in switch! Direction: " + direction);
+            return false;
+        }
+    }
+
+    private void addWordToPuzzleBasic(String word, String direction) { //Left, Right, Up, Down
+        boolean added = false;
+        int xMin = 0, xMax = 0, yMin = 0, yMax = 0;
+        String wordToAdd = new String(word);
+
+        switch (direction) {
+            case "Right":
+                wordToAdd = new StringBuilder(word).reverse().toString(); //reverse word, then fallthrough to "Left"
+            case "Left":
+                xMin = 0; xMax = puzzle.length-wordToAdd.length();
+                yMin = 0; yMax = puzzle[0].length;
+            break;
+
+            case "Up":
+                wordToAdd = new StringBuilder(word).reverse().toString(); // reverse word, then fallthrough to "Down"
+            case "Down":
+                xMin = 0; xMax = puzzle.length;
+                yMin = 0; yMax = puzzle[0].length-wordToAdd.length();
+            break;
+        
+            default: 
+                return;
+        }
+
+        WordExtraInfo info = new WordExtraInfo();
+        for (int attempts = 0; !added && attempts < 100; attempts++) { //Try 100 times to add word
+            int x = xMin + (int)(Math.random() * (xMax - xMin));
+            int y = yMin + (int)(Math.random() * (yMax - yMin));
+            if(addWord(wordToAdd, direction, x, y, info)) {
+                added = true;
+                puzzleWordsInfo.add(info);
+            }
+        }
+    }
+
+    private void addWordToPuzzleDiagonal(String direction) { //"Diagonal Left Down", "Diagonal Left Up", "Diagonal Right Down", "Diagonal Right Up"
+
+    }
 
     private void generateWordSearchPuzzle() {
-        
+        ArrayList<String> words = new ArrayList<String>(puzzleWords); //make a copy
+        final String[] directions = {"Left", "Right", "Up", "Down", "Diagonal Left Down", "Diagonal Left Up", "Diagonal Right Down", "Diagonal Right Up"};
+
+        for (String word : words) {
+            int randDir = (int)(Math.random() * directions.length);
+            String direction = directions[randDir];
+
+            switch (direction) {
+                case "Left":
+                case "Right":
+                case "Up":
+                case "Down":
+                    addWordToPuzzleBasic(word, direction);
+                break;
+
+                case "Diagonal Left Down":
+                case "Diagonal Left Up":
+                case "Diagonal Right Down":
+                case "Diagonal Right Up":
+                    System.out.println(direction + " Not Implemented! Adding as Left");
+                    addWordToPuzzleBasic(word, "Left");
+                break;
+            
+                default:
+                    System.out.println("Hit default in switch! Direction: " + direction);
+                break;
+            }
+        }
+
+        // x is row; y is column; fill in the empty slots in wordsearch here
+        for (int x = 0; x < puzzle.length; x++) {
+            for (int y = 0; y < puzzle[x].length; y++) {
+                if (puzzle[x][y] == '\0') {
+                    puzzle[x][y] = (char)((int)(Math.random()*26)+'A');
+                }
+            }
+        }        
     }
 
     private ArrayList<String> readWordsFromFile(String fileName) {
@@ -90,7 +226,7 @@ public class WordSearchPuzzle {
             for (int i = 0; i < words.size(); i++) { //Remove words that are too small or big
                 int len = words.get(i).length();
                 if (len < shortest || len > longest) {
-                    words.remove(i--);//i-- is needed as everything in the ArrayList gets shifted up when we remove, so i would be ahead
+                    words.remove(i--); //i-- is needed as everything in the ArrayList gets shifted up when we remove, so i would be ahead
                 }
             }
 
@@ -118,6 +254,7 @@ public class WordSearchPuzzle {
         //return Arrays.deepToString(puzzle);
         StringBuilder str = new StringBuilder(puzzle.length*puzzle[0].length);
         
+        //x is row; y is column
         for (int x = 0; x < puzzle.length; x++) {
             for (int y = 0; y < puzzle[x].length; y++) {
                 str.append(puzzle[x][y]);
