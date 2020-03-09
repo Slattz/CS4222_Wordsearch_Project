@@ -19,13 +19,13 @@ public class WordSearchPuzzle {
     private List<WordExtraInfo> puzzleWordsInfo; //Change to Map in future so the words can be used as keys rather than dpeending on being in same index
 
     private boolean canWordFit(String word, String direction, int row, int column) {
-        System.out.printf("Trying \"%s\"; Direction: %s; Row: %d; Col: %d\n", word, direction, row, column);
+        //System.out.printf("Trying \"%s\"; Direction: %s; Row: %d; Col: %d\n", word, direction, row, column);
         switch (direction) { //switch case for the least amount of duped code
             case "Left":
             case "Right":
                 for (int i = 0; i < word.length(); i++) {
                     if (puzzle[row][column+i] != '\0' && puzzle[row][column+i] != word.charAt(i)) {
-                        System.out.printf("\"%s\" cant fit; Direction: %s; Row: %d; Col: %d\n", word, direction, row, column);
+                        //System.out.printf("\"%s\" cant fit; Direction: %s; Row: %d; Col: %d\n", word, direction, row, column);
                         return false;
                     }
                 }
@@ -35,7 +35,7 @@ public class WordSearchPuzzle {
             case "Down":
                 for (int i = 0; i < word.length(); i++) {
                     if (puzzle[row+i][column] != '\0' && puzzle[row+i][column] != word.charAt(i)) {
-                        System.out.printf("Up/Down: validSpaces (len: %d) != word.length() (len: %d) for word %s\n", i, word.length(), word);
+                        //System.out.printf("Up/Down: validSpaces (len: %d) != word.length() (len: %d) for word %s\n", i, word.length(), word);
                         return false;
                     }
                 }
@@ -113,7 +113,7 @@ public class WordSearchPuzzle {
         }
 
         if (attempts >= 100) {
-            System.out.printf("Couldn't fit word \"%s\" in direction: %s\n", word, direction);
+            //System.out.printf("Couldn't fit word \"%s\" in direction: %s\n", word, direction);
         }
     }
 
