@@ -1,6 +1,7 @@
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.awt.Point;
 import java.io.*;
 import java.nio.file.*;
@@ -10,13 +11,12 @@ public class WordSearchPuzzle {
     class WordExtraInfo {
         Point location; //Point.x is row; Point.y is column
         String direction;
-
-        WordExtraInfo() { location = new Point(); }
+        WordExtraInfo() { location = new Point(); } //default ctor
     }
 
     private char[][] puzzle;
     private List<String> puzzleWords;
-    private List<WordExtraInfo> puzzleWordsInfo; //Change to Map in future so the words can be used as keys rather than dpeending on being in same index
+    private Map<String, WordExtraInfo> puzzleWordsInfo; 
 
     private boolean canWordFit(String word, String direction, int row, int column) {
         //System.out.printf("Trying \"%s\"; Direction: %s; Row: %d; Col: %d\n", word, direction, row, column);
@@ -107,7 +107,7 @@ public class WordSearchPuzzle {
             if (canWordFit(wordToAdd, direction, info.location.x, info.location.y)) {
                 if (addWord(wordToAdd, direction, info)) {
                     added = true;
-                    puzzleWordsInfo.add(info);
+                    puzzleWordsInfo.put(word, info);
                 }
             }
         }
@@ -121,17 +121,17 @@ public class WordSearchPuzzle {
         //final String[] directions = {"Left", "Right", "Up", "Down", "Diagonal Left Down", "Diagonal Left Up", "Diagonal Right Down", "Diagonal Right Up"};
         final String[] directions = {"Left", "Right", "Up", "Down"}; //Basic
 
-        for (String word : puzzleWords) {
+        for (int i = 0; i < puzzleWords.size(); i++) {
             int randDir = (int)(Math.random() * directions.length);
             String direction = directions[randDir];
-            word = word.toUpperCase();
+            puzzleWords.set(i, puzzleWords.get(i).toUpperCase());
 
             switch (direction) {
                 case "Left":
                 case "Right":
                 case "Up":
                 case "Down":
-                    addWordToPuzzleBasic(word, direction);
+                    addWordToPuzzleBasic(puzzleWords.get(i), direction);
                 break;
             
                 default:
@@ -152,7 +152,7 @@ public class WordSearchPuzzle {
 
     private ArrayList<String> readWordsFromFile(String fileName) {
         try {
-            ///*
+            /*
             FileReader aFileReader = new FileReader(fileName);
             BufferedReader aBufferReader = new BufferedReader(aFileReader);
 
@@ -167,16 +167,23 @@ public class WordSearchPuzzle {
             aBufferReader.close();
             aFileReader.close();
             return wordList;
-            //*/
+            */
             
-            //Path filePath = FileSystems.getDefault().getPath(fileName);
-            //return Files.readAllLines(filePath, Charset.defaultCharset());
+            Path filePath = FileSystems.getDefault().getPath(fileName);
+            return new ArrayList<String>(Files.readAllLines(filePath, Charset.defaultCharset()));
         } 
         
         catch (IOException x) {
             return null;
         }
     }
+
+    // The dimensions of the puzzle grid should be set by summing the lengths of the words being used in the puzzle and 
+    // multiplying the sum by 1.5 or 1.75 or some other (appropriate) scaling factor to ensure that the grid will have 
+    // enough additional characters to obscure the puzzle words.
+
+    // Once you have calculated how many characters you are going to have in the grid, you can calculate the grid dimensions by 
+    // getting the square root (rounded up) of the character total.
 
     private int getGridDimensions(List<String> words) {
         if (words.size() <= 0)
@@ -191,18 +198,10 @@ public class WordSearchPuzzle {
         return (int)Math.ceil(Math.sqrt(charTotal)); //Math.sqrt gets square root of charTotal; Math.ceil rounds result of sqrt up to a whole number
     }
 
-
-    // The dimensions of the puzzle grid should be set by summing the lengths of the words being used in the puzzle and 
-    // multiplying the sum by 1.5 or 1.75 or some other (appropriate) scaling factor to ensure that the grid will have 
-    // enough additional characters to obscure the puzzle words.
-
-    // Once you have calculated how many characters you are going to have in the grid, you can calculate the grid dimensions by 
-    // getting the square root (rounded up) of the character total.
-
     public WordSearchPuzzle(List<String> userSpecifiedWords) {
         int gridDim = getGridDimensions(userSpecifiedWords);
         puzzleWords = new ArrayList<String>(userSpecifiedWords);
-        puzzleWordsInfo = new ArrayList<WordExtraInfo>();
+        puzzleWordsInfo = new HashMap<String, WordExtraInfo>();
         puzzle = new char[gridDim][gridDim]; //rectangular array
         generateWordSearchPuzzle();
     }
@@ -216,7 +215,7 @@ public class WordSearchPuzzle {
     public WordSearchPuzzle(String wordFile, int wordCount, int shortest, int longest) {
         ArrayList<String> words = readWordsFromFile(wordFile);
         puzzleWords = new ArrayList<String>();
-        puzzleWordsInfo = new ArrayList<WordExtraInfo>();
+        puzzleWordsInfo = new HashMap<String, WordExtraInfo>();
 
         if (words != null && wordCount > 0 && shortest < longest) {
             for (int i = 0; i < words.size(); i++) { //Remove words that are too small or big
@@ -264,16 +263,14 @@ public class WordSearchPuzzle {
         System.out.println(getPuzzleAsString());
 
         //Now, print the words
-        for (int i = 0; i < puzzleWords.size(); i++) {
-            System.out.printf("%-20s", puzzleWords.get(i)); //pretty print the word
+        for (String word : puzzleWords) {
+            System.out.printf("%-20s", word); //pretty print the word
 
-            if (!hide && i < puzzleWordsInfo.size()) { //if false, we print the location and direction info too
-                Point pos = puzzleWordsInfo.get(i).location;
-                System.out.printf(" Location: Row=[%02d] Column=[%02d]\tDirection: [%s]", pos.x, pos.y, puzzleWordsInfo.get(i).direction);
+            if (!hide && puzzleWordsInfo.containsKey(word)) { //if hide is false, we print the location and direction info too (if it exists)
+                WordExtraInfo info = puzzleWordsInfo.get(word);
+                System.out.printf(" Location: Row=[%02d] Column=[%02d]\tDirection: [%s]", info.location.x, info.location.y, info.direction);
             }
             System.out.print('\n');
         }
     }
-
-
 }

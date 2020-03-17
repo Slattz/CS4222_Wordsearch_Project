@@ -8,12 +8,13 @@ public class WordSearchDriver {
         WordSearchPuzzle puz = new WordSearchPuzzle(lol);
 
         puz.showWordSearchPuzzle(false);
-        System.out.println("\n\n" + puz.getPuzzleAsString() + "\n\n\n");
+        //System.out.println("\n\n" + puz.getPuzzleAsString() + "\n\n\n");
 
-
+/*
         WordSearchPuzzle fpuzzle = new WordSearchPuzzle("text.txt", 10, 4, 10);
 
         fpuzzle.showWordSearchPuzzle(false);
         System.out.println("\n\n" + fpuzzle.getPuzzleAsString() + "\n\n\n");
+*/
     }
 }
