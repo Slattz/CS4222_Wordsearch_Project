@@ -7,13 +7,13 @@ public class WordSearchDriver {
         ArrayList<String> lol = new ArrayList<String>(Arrays.asList(words.split(" ")));
         WordSearchPuzzle puz = new WordSearchPuzzle(lol);
 
-        puz.showWordSearchPuzzle(false);
+        puz.showWordSearchPuzzle(true);
+        System.out.println("\n" + puz.getWordSearchList() + "\n");
         //System.out.println("\n\n" + puz.getPuzzleAsString() + "\n\n\n");
 
 
-        WordSearchPuzzle fpuzzle = new WordSearchPuzzle("text.txt", 1000, 4, 10);
-
-        fpuzzle.showWordSearchPuzzle(false);
+        //WordSearchPuzzle fpuzzle = new WordSearchPuzzle("text.txt", 10, 4, 10);
+        //fpuzzle.showWordSearchPuzzle(false);
         //System.out.println("\n\n" + fpuzzle.getPuzzleAsString() + "\n\n\n");
 
     }

@@ -22,6 +22,7 @@ public class WordSearchPuzzle {
     private Map<String, WordExtraInfo> puzzleWordsInfo;
 
     /* Private Functions */
+    //This helper function checks if a word can fit on the grid in a specific location
     private boolean canWordFit(String word, WordExtraInfo extraInfo) {
         String direction = extraInfo.direction;
         int row = extraInfo.location.x, column = extraInfo.location.y;
@@ -47,6 +48,7 @@ public class WordSearchPuzzle {
         return false;
     }
 
+    //This function tries to add a word to the puzzle is a specific direction
     private void addWordToPuzzle(String word, String direction) { //Left, Right, Up, Down
         boolean added = false;
         int rowMax, columnMax;
@@ -125,6 +127,7 @@ public class WordSearchPuzzle {
         }        
     }
 
+    //This helper function is used to read a text file based on fileName and return an ArrayList
     private ArrayList<String> readWordsFromFile(String fileName) {
         try {
             /*
@@ -153,6 +156,7 @@ public class WordSearchPuzzle {
         }
     }
 
+    //This helper function gets the wordsearch's grid dimensions based on the list of words provided
     private int getGridDimensions(List<String> words) {
         if (words.size() <= 0)
             return 0;
@@ -166,6 +170,7 @@ public class WordSearchPuzzle {
         return (int)Math.ceil(Math.sqrt(charTotal)); //Math.sqrt gets square root of charTotal; Math.ceil rounds result of sqrt up to a whole number
     }
 
+    //WordSearchPuzzle ctor, using user-definied list of words
     public WordSearchPuzzle(List<String> userSpecifiedWords) {
         int gridDim = getGridDimensions(userSpecifiedWords);
         puzzleWords = new ArrayList<String>(userSpecifiedWords);
@@ -174,6 +179,7 @@ public class WordSearchPuzzle {
         generateWordSearchPuzzle();
     }
 
+    //WordSearchPuzzle ctor, using a file with a list of words
     public WordSearchPuzzle(String wordFile, int wordCount, int shortest, int longest) {
         ArrayList<String> words = readWordsFromFile(wordFile);
         puzzleWords = new ArrayList<String>();
@@ -208,31 +214,33 @@ public class WordSearchPuzzle {
     }
 
     public String getPuzzleAsString() {
-        StringBuilder str = new StringBuilder(puzzle.length*puzzle[0].length);
+        StringBuilder str = new StringBuilder(puzzle.length*puzzle[0].length); //give StringBuilder rough size so we don't repeatedly allocate memory
         
         for (int row = 0; row < puzzle.length; row++) {
+            str.append('|');
             for (int col = 0; col < puzzle[row].length; col++) {
                 str.append(puzzle[row][col]);
             }
-            str.append('\n');
+            str.append("|\n");
         }
 
         return str.toString();
     }
 
     public void showWordSearchPuzzle(boolean hide) {
-        System.out.println("WordSearch\n----------");
+        System.out.printf("WordSearch:\n\n");
         System.out.println(getPuzzleAsString());
 
         //Now, print the words
         for (String word : puzzleWords) {
-            System.out.printf("%-20s", word); //pretty print the word
+            System.out.printf("%-20s", word); //pretty print the words
 
             if (!hide && puzzleWordsInfo.containsKey(word)) { //if hide is false, we print the location and direction info too (if it exists)
                 WordExtraInfo info = puzzleWordsInfo.get(word);
-                System.out.printf(" Location: Row=[%02d] Column=[%02d]\tDirection: [%s]", info.location.x, info.location.y, info.direction);
+                System.out.printf(" Location: Row %02d ; Column %02d ;\tDirection: %s", info.location.x, info.location.y, info.direction);
             }
-            System.out.print('\n');
+            System.out.println();
         }
+        System.out.println();
     }
 }
