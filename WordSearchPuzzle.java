@@ -153,13 +153,6 @@ public class WordSearchPuzzle {
         }
     }
 
-    // The dimensions of the puzzle grid should be set by summing the lengths of the words being used in the puzzle and 
-    // multiplying the sum by 1.5 or 1.75 or some other (appropriate) scaling factor to ensure that the grid will have 
-    // enough additional characters to obscure the puzzle words.
-
-    // Once you have calculated how many characters you are going to have in the grid, you can calculate the grid dimensions by 
-    // getting the square root (rounded up) of the character total.
-
     private int getGridDimensions(List<String> words) {
         if (words.size() <= 0)
             return 0;
@@ -181,12 +174,6 @@ public class WordSearchPuzzle {
         generateWordSearchPuzzle();
     }
 
-    // Puzzle generation using words from a file:
-        // The user supplies the filename. In the file the words should appear one per line.
-        // The wordCount specifies the number of words to (randomly) select from the file for use in the puzzle.
-        // 'shortest' specify the shortest word length to be used and 'longest' specifies the longest word length to be used.
-
-    // So, using the words in the file, randomly select 'wordCount' words with lengths between shortest and longest.
     public WordSearchPuzzle(String wordFile, int wordCount, int shortest, int longest) {
         ArrayList<String> words = readWordsFromFile(wordFile);
         puzzleWords = new ArrayList<String>();
