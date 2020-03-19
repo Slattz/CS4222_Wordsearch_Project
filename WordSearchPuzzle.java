@@ -79,6 +79,7 @@ public class WordSearchPuzzle {
             extraInfo.location.y = (int)(Math.random() * columnMax);
             if (canWordFit(wordToAdd, extraInfo)) { //If the word can fit in the location, we add it to the wordsearch
                 added = true;
+                puzzleWordsInfo.put(word, extraInfo);
                 int row = extraInfo.location.x, column = extraInfo.location.y;
 
                 switch (direction) { //switch case for the least amount of duped code
