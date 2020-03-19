@@ -7,7 +7,7 @@ public class WordSearchDriver {
         ArrayList<String> lol = new ArrayList<String>(Arrays.asList(words.split(" ")));
         WordSearchPuzzle puz = new WordSearchPuzzle(lol);
 
-        puz.showWordSearchPuzzle(true);
+        puz.showWordSearchPuzzle(false);
         System.out.println("\n" + puz.getWordSearchList() + "\n");
         //System.out.println("\n\n" + puz.getPuzzleAsString() + "\n\n\n");
 

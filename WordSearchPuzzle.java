@@ -1,11 +1,6 @@
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*; //List, ArrayList, Collections, Comparator, Map, HashMap
 import java.awt.Point;
-import java.io.*;
+import java.io.IOException;
 import java.nio.file.*;
 import java.nio.charset.Charset;
 
@@ -167,7 +162,7 @@ public class WordSearchPuzzle {
             charTotal += string.length();
         }
 
-        charTotal *= 2.25f; //multiply by scaling factor
+        charTotal *= 2.5f; //multiply by scaling factor
         return (int)Math.ceil(Math.sqrt(charTotal)); //Math.sqrt gets square root of charTotal; Math.ceil rounds result of sqrt up to a whole number
     }
 
@@ -238,10 +233,9 @@ public class WordSearchPuzzle {
 
             if (!hide && puzzleWordsInfo.containsKey(word)) { //if hide is false, we print the location and direction info too (if it exists)
                 WordExtraInfo info = puzzleWordsInfo.get(word);
-                System.out.printf(" Location: Row %02d ; Column %02d ;\tDirection: %s", info.location.x, info.location.y, info.direction);
+                System.out.printf(" [Location: Row %02d, Column %02d; Direction: %s]", info.location.x, info.location.y, info.direction);
             }
             System.out.println();
         }
-        System.out.println();
     }
 }
