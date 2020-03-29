@@ -5,23 +5,20 @@ import java.nio.file.*;
 import java.nio.charset.Charset;
 
 public class WordSearchPuzzle {
-    class WordExtraInfo { //Custom type to store the extra info in
+    class WordExtraInfo { //Custom class to store the extra info in
         Point location; //Point.x is row; Point.y is column
         String direction;
-        WordExtraInfo(String dir) { direction = dir; location = new Point(); } //default ctor
+        WordExtraInfo(String dir) { direction = dir; location = new Point(0,0); } //default ctor
     }
 
     /* Member Variables */
     private char[][] puzzle;
     private List<String> puzzleWords;
-    private Map<String, WordExtraInfo> puzzleWordsInfo;
+    private Map<String, WordExtraInfo> puzzleWordsInfo; //map the words to extra info 
 
     /* Private Functions */
     //This helper function checks if a word can fit on the grid in a specific location
-    private boolean canWordFit(String word, WordExtraInfo extraInfo) {
-        String direction = extraInfo.direction;
-        int row = extraInfo.location.x, column = extraInfo.location.y;
-
+    private boolean canWordFit(String word, String direction, int row, int column) {
         if ("Left".equals(direction) || "Right".equals(direction)) {
             for (int i = 0; i < word.length(); i++) {
                 if (puzzle[row][column+i] != '\0' && puzzle[row][column+i] != word.charAt(i)) {
@@ -52,49 +49,47 @@ public class WordSearchPuzzle {
 
         switch (direction) {
             case "Left":
-                wordToAdd = new StringBuilder(word).reverse().toString(); //reverse word, then fallthrough to "Right"
+                wordToAdd = new StringBuilder(word).reverse().toString(); //reverse word
+                extraInfo.location.x = wordToAdd.length(); // Words going left are reversed so start pos is length; fall-through to "Right"
             case "Right":
                 rowMax = puzzle.length-1;
                 columnMax = puzzle[0].length-wordToAdd.length()-2; //-2 as need to minus 1 from each length
             break;
                 
             case "Up":
-                wordToAdd = new StringBuilder(word).reverse().toString(); //reverse word, then fallthrough to "Down"
+                wordToAdd = new StringBuilder(word).reverse().toString(); //reverse word
+                extraInfo.location.y = wordToAdd.length(); // Words going up are reversed so start pos is length; fall-through to "Down"
             case "Down":
                 rowMax = puzzle.length-wordToAdd.length()-2; //-2 as need to minus 1 from each length
                 columnMax = puzzle[0].length-1;
             break;
         
-            default: 
+            default: //Anything invalid (e.g. memory edits/corruption) return so nothing messes up
                 return;
         }
 
-        for (int attempts = 0; !added && attempts < 100; attempts++) { //Try 100 times to add word in random places
-            extraInfo.location.x = (int)(Math.random() * rowMax); //no need for a minimum value as we always start from 0,0 for each word
-            extraInfo.location.y = (int)(Math.random() * columnMax);
-            if (canWordFit(wordToAdd, extraInfo)) { //If the word can fit in the location, we add it to the wordsearch
+        for (int attempts = 0; !added && attempts < 100; attempts++) { //Try 100 times to add word in random places, within the bounds we set
+            int row = (int)(Math.random() * rowMax); //no need for a minimum value as we always start from 0,0 for each word
+            int column = (int)(Math.random() * columnMax);
+            if (canWordFit(wordToAdd, direction, row, column)) { //If the word can fit in the location, we add it to the wordsearch
                 added = true;
+                extraInfo.location.x += row; //+= as may already have a value if word is reversed
+                extraInfo.location.y += column;
                 puzzleWordsInfo.put(word, extraInfo);
-                int row = extraInfo.location.x, column = extraInfo.location.y;
 
-                switch (direction) { //switch case for the least amount of duped code
-                    case "Left":
-                        extraInfo.location.x += wordToAdd.length(); //Words going left are reversed earlier; fall-through
-                    case "Right":
-                        for (int i = 0; i < wordToAdd.length(); i++) {
-                            puzzle[row][column + i] = wordToAdd.charAt(i);
-                        }
-                    break;
+                if ("Left".equals(direction) || "Right".equals(direction)) {
+                    for (int i = 0; i < wordToAdd.length(); i++) {
+                        puzzle[row][column+i] = wordToAdd.charAt(i);
+                    }
+                }
 
-                    case "Up":
-                        extraInfo.location.y += wordToAdd.length(); //Words going up are reversed earlier; fall-through
-                    case "Down":
-                        for (int i = 0; i < wordToAdd.length(); i++) {
-                            puzzle[row + i][column] = wordToAdd.charAt(i);
-                        }
-                    break;
+                else { //No need to seperately check "Up" and "Down" again: direction is already checked for invalidness in the switch statement
+                    for (int i = 0; i < wordToAdd.length(); i++) {
+                        puzzle[row+i][column] = wordToAdd.charAt(i);
+                    }
                 }
             }
+            else System.out.printf("[DEBUG] Attempt: %d; Couldn't add %s to row %d col %d, dir %s\n", attempts, wordToAdd, row, column, extraInfo.direction);
         }
     }
 
@@ -182,7 +177,7 @@ public class WordSearchPuzzle {
         puzzleWordsInfo = new HashMap<String, WordExtraInfo>();
 
         if (words != null && wordCount > 0 && shortest < longest) {
-            for (int i = 0; i < words.size(); i++) { //Remove words that are too small or big
+            for (int i = 0; i < words.size(); i++) { //Remove words that are too small or big first
                 int len = words.get(i).length();
                 if (len < shortest || len > longest) {
                     words.remove(i--); //i-- is needed as everything in the ArrayList gets shifted up when we remove, so i would be ahead
