@@ -19,6 +19,10 @@ public class WordSearchPuzzle {
     /* Private Functions */
     //This helper function checks if a word can fit on the grid in a specific location
     private boolean canWordFit(String word, String direction, int row, int column) {
+        if (row < 0 || row >= puzzle.length || column < 0 || column >= puzzle[row].length) {
+            return false;
+        }
+
         if ("Left".equals(direction) || "Right".equals(direction)) {
             for (int i = 0; i < word.length(); i++) {
                 if (puzzle[row][column+i] != '\0' && puzzle[row][column+i] != word.charAt(i)) {
@@ -89,18 +93,12 @@ public class WordSearchPuzzle {
                     }
                 }
             }
-            else System.out.printf("[DEBUG] Attempt: %d; Couldn't add %s to row %d col %d, dir %s\n", attempts, wordToAdd, row, column, extraInfo.direction);
+            //else System.out.printf("[DEBUG] Attempt: %d; Couldn't add %s to row %d col %d, dir %s\n", attempts, wordToAdd, row, column, extraInfo.direction);
         }
     }
 
     private void generateWordSearchPuzzle() {
         final String[] directions = {"Left", "Right", "Up", "Down"}; //Basic, no diagonals
-
-        Collections.sort(puzzleWords, new Comparator<String>() { //sort in descending order so bigger words at beggining and easier to place
-                public int compare(String x, String y) {
-                return y.length() - x.length();
-            }
-        });
 
         for (int i = 0; i < puzzleWords.size(); i++) {
             int randDir = (int)(Math.random() * directions.length);
@@ -149,6 +147,12 @@ public class WordSearchPuzzle {
 
     //This helper function gets the wordsearch's grid dimensions based on the list of words provided
     private int getGridDimensions(List<String> words) {
+        Collections.sort(puzzleWords, new Comparator<String>() { //sort in descending order so bigger words at beggining and easier to place
+                public int compare(String x, String y) {
+                return y.length() - x.length();
+            }
+        });
+
         if (words.size() <= 0)
             return 0;
 
@@ -157,15 +161,15 @@ public class WordSearchPuzzle {
             charTotal += string.length();
         }
 
-        charTotal *= 2.5f; //multiply by scaling factor
-        return (int)Math.ceil(Math.sqrt(charTotal)); //Math.sqrt gets square root of charTotal; Math.ceil rounds result of sqrt up to a whole number
+        charTotal *= 2.5; //multiply by scaling factor
+        return Math.max((int)Math.ceil(Math.sqrt(charTotal)), words.get(0).length()); //Math.sqrt gets square root of charTotal; Math.ceil rounds result of sqrt up to a whole number
     }
 
     //WordSearchPuzzle ctor, using user-definied list of words
     public WordSearchPuzzle(List<String> userSpecifiedWords) {
-        int gridDim = getGridDimensions(userSpecifiedWords);
         puzzleWords = new ArrayList<String>(userSpecifiedWords);
         puzzleWordsInfo = new HashMap<String, WordExtraInfo>();
+        int gridDim = getGridDimensions(puzzleWords);
         puzzle = new char[gridDim][gridDim]; //rectangular array
         generateWordSearchPuzzle();
     }
@@ -176,7 +180,8 @@ public class WordSearchPuzzle {
         puzzleWords = new ArrayList<String>();
         puzzleWordsInfo = new HashMap<String, WordExtraInfo>();
 
-        if (words != null && wordCount > 0 && shortest < longest) {
+
+        if (words != null && wordCount > 0 && shortest <= longest) {
             for (int i = 0; i < words.size(); i++) { //Remove words that are too small or big first
                 int len = words.get(i).length();
                 if (len < shortest || len > longest) {
@@ -205,7 +210,7 @@ public class WordSearchPuzzle {
     }
 
     public String getPuzzleAsString() {
-        StringBuilder str = new StringBuilder(puzzle.length*puzzle[0].length); //give StringBuilder rough size so we don't repeatedly allocate memory
+        StringBuilder str = new StringBuilder(); //give StringBuilder rough size so we don't repeatedly allocate memory
         
         for (int row = 0; row < puzzle.length; row++) {
             str.append('|');
