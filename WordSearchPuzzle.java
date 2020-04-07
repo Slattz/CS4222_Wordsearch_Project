@@ -107,7 +107,7 @@ public class WordSearchPuzzle {
         puzzle = new char[gridDim][gridDim]; // rectangular array
 
         for (int i = 0; i < puzzleWords.size(); i++) {
-            puzzleWords.set(i, puzzleWords.get(i).toLowerCase()); //Make the words all uppercase
+            puzzleWords.set(i, puzzleWords.get(i).toUpperCase()); //Make the words all uppercase
             addWordToPuzzle(puzzleWords.get(i));
         }
 
@@ -121,35 +121,6 @@ public class WordSearchPuzzle {
         }        
     }
 
-    //This helper function is used to read a text file based on fileName and return an ArrayList
-    private ArrayList<String> readWordsFromFile(String fileName) {
-        try {
-            /*
-            FileReader aFileReader = new FileReader(fileName);
-            BufferedReader aBufferReader = new BufferedReader(aFileReader);
-
-            ArrayList<String> wordList = new ArrayList<String>();
-
-            String aWord = aBufferReader.readLine();
-            while (aWord != null) {
-                wordList.add(aWord.toUpperCase());
-                aWord = aBufferReader.readLine();
-            }
-
-            aBufferReader.close();
-            aFileReader.close();
-            return wordList;
-            */
-            
-            Path filePath = FileSystems.getDefault().getPath(fileName);
-            return new ArrayList<String>(Files.readAllLines(filePath, Charset.defaultCharset()));
-        } 
-        
-        catch (IOException x) {
-            return null;
-        }
-    }
-
     //WordSearchPuzzle ctor, using user-definied list of words
     public WordSearchPuzzle(List<String> userSpecifiedWords) {
         puzzleWords = new ArrayList<String>(userSpecifiedWords);
@@ -159,9 +130,19 @@ public class WordSearchPuzzle {
 
     //WordSearchPuzzle ctor, using a file with a list of words
     public WordSearchPuzzle(String wordFile, int wordCount, int shortest, int longest) {
-        ArrayList<String> words = readWordsFromFile(wordFile);
+        puzzle = new char[0][0]; //Prevent crashing incase file not found
         puzzleWords = new ArrayList<String>();
         puzzleWordsInfo = new HashMap<String, WordExtraInfo>();
+        ArrayList<String> words;
+        try {
+            Path filePath = FileSystems.getDefault().getPath(wordFile);
+            words = new ArrayList<String>(Files.readAllLines(filePath, Charset.defaultCharset()));
+        }
+
+        catch (IOException x) {
+            System.err.printf("File \"%s\" Not Found!\n", wordFile);
+            return;
+        }
 
         if (words != null && wordCount > 0 && shortest <= longest) {
             for (int i = 0; i < words.size(); i++) { //Remove words that are too small or big first
