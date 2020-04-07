@@ -19,7 +19,7 @@ public class WordSearchPuzzle {
     /* Private Functions */
     //This helper function checks if a word can fit on the grid in a specific location
     private boolean canWordFit(String word, String direction, int row, int column) {
-        if (row < 0 || row >= puzzle.length || column < 0 || column >= puzzle[row].length) {
+        if (row < 0 || row >= puzzle.length || column < 0 || column >= puzzle[row].length) { //OOB checks
             return false;
         }
 
@@ -100,10 +100,24 @@ public class WordSearchPuzzle {
     private void generateWordSearchPuzzle() {
         final String[] directions = {"Left", "Right", "Up", "Down"}; //Basic, no diagonals
 
+        Collections.sort(puzzleWords, new Comparator<String>() { //sort in descending order so biggest words at beginning and easier to place
+                public int compare(String x, String y) {
+                return y.length() - x.length();
+            }
+        });
+
+        float charTotal = 0;
+        for (String string : puzzleWords) {
+            charTotal += string.length();
+        }
+
+        charTotal *= 1.5f; //multiply by scaling factor
+        int gridDim = Math.max((int)Math.ceil(Math.sqrt(charTotal)), puzzleWords.get(0).length()); //Math.sqrt gets square root of charTotal; Math.ceil rounds result of sqrt up to a whole number
+        puzzle = new char[gridDim][gridDim]; // rectangular array
+
         for (int i = 0; i < puzzleWords.size(); i++) {
-            int randDir = (int)(Math.random() * directions.length);
-            puzzleWords.set(i, puzzleWords.get(i).toUpperCase());
-            addWordToPuzzle(puzzleWords.get(i), directions[randDir]);
+            puzzleWords.set(i, puzzleWords.get(i).toUpperCase()); //Make the words all uppercase
+            addWordToPuzzle(puzzleWords.get(i), directions[(int)(Math.random() * directions.length)]);
         }
 
         // x is row; y is column; fill in the empty slots in wordsearch here
@@ -145,32 +159,10 @@ public class WordSearchPuzzle {
         }
     }
 
-    //This helper function gets the wordsearch's grid dimensions based on the list of words provided
-    private int getGridDimensions(List<String> words) {
-        Collections.sort(puzzleWords, new Comparator<String>() { //sort in descending order so bigger words at beggining and easier to place
-                public int compare(String x, String y) {
-                return y.length() - x.length();
-            }
-        });
-
-        if (words.size() <= 0)
-            return 0;
-
-        double charTotal = 0;
-        for (String string : words) {
-            charTotal += string.length();
-        }
-
-        charTotal *= 2.5; //multiply by scaling factor
-        return Math.max((int)Math.ceil(Math.sqrt(charTotal)), words.get(0).length()); //Math.sqrt gets square root of charTotal; Math.ceil rounds result of sqrt up to a whole number
-    }
-
     //WordSearchPuzzle ctor, using user-definied list of words
     public WordSearchPuzzle(List<String> userSpecifiedWords) {
         puzzleWords = new ArrayList<String>(userSpecifiedWords);
         puzzleWordsInfo = new HashMap<String, WordExtraInfo>();
-        int gridDim = getGridDimensions(puzzleWords);
-        puzzle = new char[gridDim][gridDim]; //rectangular array
         generateWordSearchPuzzle();
     }
 
@@ -179,7 +171,6 @@ public class WordSearchPuzzle {
         ArrayList<String> words = readWordsFromFile(wordFile);
         puzzleWords = new ArrayList<String>();
         puzzleWordsInfo = new HashMap<String, WordExtraInfo>();
-
 
         if (words != null && wordCount > 0 && shortest <= longest) {
             for (int i = 0; i < words.size(); i++) { //Remove words that are too small or big first
@@ -195,9 +186,6 @@ public class WordSearchPuzzle {
                 words.remove(rand);
             }
         }
-
-        int gridDim = getGridDimensions(puzzleWords);
-        puzzle = new char[gridDim][gridDim]; // rectangular array
         generateWordSearchPuzzle();
     }
 
