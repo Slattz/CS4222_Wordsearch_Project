@@ -1,3 +1,4 @@
+//Shane Slattery (19235046)
 import java.util.*; //List, ArrayList, Comparator, Map, HashMap
 import java.awt.Point;
 import java.io.IOException;
@@ -39,7 +40,6 @@ public class WordSearchPuzzle {
                 }
             }
             return true;
-        
         }
     }
 
@@ -93,7 +93,7 @@ public class WordSearchPuzzle {
 
     private void generateWordSearchPuzzle() {
         puzzleWords.sort(new Comparator<String>() { //sort in descending order so biggest words at beginning and easier to place
-                public int compare(String x, String y) {
+            public int compare(String x, String y) {
                 return y.length() - x.length();
             }
         });
@@ -133,12 +133,11 @@ public class WordSearchPuzzle {
         puzzle = new char[0][0]; //Prevent crashing incase file not found
         puzzleWords = new ArrayList<String>();
         puzzleWordsInfo = new HashMap<String, WordExtraInfo>();
-        ArrayList<String> words;
+        ArrayList<String> words = null;
         try {
             Path filePath = FileSystems.getDefault().getPath(wordFile);
             words = new ArrayList<String>(Files.readAllLines(filePath, Charset.defaultCharset()));
         }
-
         catch (IOException x) {
             System.err.printf("File \"%s\" Not Found!\n", wordFile);
             return;
@@ -155,7 +154,7 @@ public class WordSearchPuzzle {
             while (puzzleWords.size() < wordCount && !words.isEmpty()) {
                 int rand = (int)(Math.random()*words.size());
                 puzzleWords.add(words.get(rand));
-                words.remove(rand);
+                words.remove(rand); //So we dont get duplicates
             }
         }
         generateWordSearchPuzzle();
