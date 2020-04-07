@@ -205,16 +205,17 @@ public class WordSearchPuzzle {
     public void showWordSearchPuzzle(boolean hide) {
         System.out.printf("WordSearch:\n\n");
         System.out.println(getPuzzleAsString());
+        StringBuilder wordList = new StringBuilder(); //Faster to prepare string and print once rather than printing multiple times
 
-        //Now, print the words
-        for (String word : puzzleWords) {
-            System.out.printf("%-20s", word); //pretty print the words
+        for (String word : puzzleWords) { //Get each word
+            wordList.append(String.format("%-20s", word)); //pretty print the words
 
             if (!hide && puzzleWordsInfo.containsKey(word)) { //if hide is false, we print the location and direction info too (if it exists)
                 WordExtraInfo info = puzzleWordsInfo.get(word);
-                System.out.printf(" [Location: Row %02d, Column %02d; Direction: %s]", info.location.x, info.location.y, info.direction);
+                wordList.append(String.format(" [Location: Row %02d, Column %02d; Direction: %s]", info.location.x, info.location.y, info.direction));
             }
-            System.out.println();
+            wordList.append('\n');
         }
+        System.out.print(wordList);
     }
 }
