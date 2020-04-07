@@ -1,4 +1,4 @@
-import java.util.*; //List, ArrayList, Collections, Comparator, Map, HashMap
+import java.util.*; //List, ArrayList, Comparator, Map, HashMap
 import java.awt.Point;
 import java.io.IOException;
 import java.nio.file.*;
@@ -8,7 +8,7 @@ public class WordSearchPuzzle {
     class WordExtraInfo { //Custom class to store the extra info in
         Point location; //Point.x is row; Point.y is column
         String direction;
-        WordExtraInfo(String dir) { direction = dir; location = new Point(0,0); } //default ctor
+        WordExtraInfo() { location = new Point(0,0); } //default ctor
     }
 
     /* Member Variables */
@@ -25,82 +25,74 @@ public class WordSearchPuzzle {
 
         if ("Left".equals(direction) || "Right".equals(direction)) {
             for (int i = 0; i < word.length(); i++) {
-                if (puzzle[row][column+i] != '\0' && puzzle[row][column+i] != word.charAt(i)) {
+                if (puzzle[row][column+i] != '\0' && puzzle[row][column+i] != word.charAt(i)) { //Basic character overlapping allowed
                     return false;
                 }
             }
             return true;
         }
 
-        else if ("Up".equals(direction) || "Down".equals(direction)) {
+        else { //Has to be the other two directions
             for (int i = 0; i < word.length(); i++) {
-                if (puzzle[row+i][column] != '\0' && puzzle[row+i][column] != word.charAt(i)) {
+                if (puzzle[row+i][column] != '\0' && puzzle[row+i][column] != word.charAt(i)) { //Basic character overlapping allowed
                     return false;
                 }
             }
             return true;
         
         }
-        return false;
     }
 
-    //This function tries to add a word to the puzzle is a specific direction
-    private void addWordToPuzzle(String word, String direction) { //Left, Right, Up, Down
+    //This function tries to add a word to the puzzle
+    private void addWordToPuzzle(String word) {
+        final String[] directions = {"Left", "Right", "Up", "Down"}; //Basic, no diagonals
+        WordExtraInfo extraInfo = new WordExtraInfo();
+        String wordToAdd = new String(word);
         boolean added = false;
-        int rowMax, columnMax;
-        String wordToAdd = word;
-        WordExtraInfo extraInfo = new WordExtraInfo(direction);
 
-        switch (direction) {
-            case "Left":
-                wordToAdd = new StringBuilder(word).reverse().toString(); //reverse word
-                extraInfo.location.x = wordToAdd.length(); // Words going left are reversed so start pos is length; fall-through to "Right"
-            case "Right":
-                rowMax = puzzle.length-1;
-                columnMax = puzzle[0].length-wordToAdd.length()-2; //-2 as need to minus 1 from each length
-            break;
-                
-            case "Up":
-                wordToAdd = new StringBuilder(word).reverse().toString(); //reverse word
-                extraInfo.location.y = wordToAdd.length(); // Words going up are reversed so start pos is length; fall-through to "Down"
-            case "Down":
-                rowMax = puzzle.length-wordToAdd.length()-2; //-2 as need to minus 1 from each length
-                columnMax = puzzle[0].length-1;
-            break;
-        
-            default: //Anything invalid (e.g. memory edits/corruption) return so nothing messes up
-                return;
-        }
+        for (int attempts = 0; !added && attempts < 100; attempts++) { //Try 100 times to add word in random places to make sure not unlucky
+            String direction = directions[(int)(Math.random() * directions.length)];
+            boolean horizontal = ("Left".equals(direction) || "Right".equals(direction));
 
-        for (int attempts = 0; !added && attempts < 100; attempts++) { //Try 100 times to add word in random places, within the bounds we set
+            int rowMax = puzzle.length - (horizontal ? 1 : word.length()); //no need to -1 from each length as they minus each other
+            int columnMax = puzzle[0].length - (!horizontal ? 1 : word.length());
             int row = (int)(Math.random() * rowMax); //no need for a minimum value as we always start from 0,0 for each word
             int column = (int)(Math.random() * columnMax);
+
+            if ("Left".equals(direction) || "Up".equals(direction)) {
+                wordToAdd = new StringBuilder(word).reverse().toString(); //reverse word so it's treated like right/down
+            }
+
             if (canWordFit(wordToAdd, direction, row, column)) { //If the word can fit in the location, we add it to the wordsearch
                 added = true;
-                extraInfo.location.x += row; //+= as may already have a value if word is reversed
-                extraInfo.location.y += column;
+                extraInfo.location.x = row;
+                extraInfo.location.y = column;
+                extraInfo.direction = direction;
+
+                switch (direction) {
+                    case "Left":
+                        extraInfo.location.y += wordToAdd.length()-1; // Words going left are reversed so start pos is length; fall-through to "Right"
+                    case "Right":
+                        for (int i = 0; i < wordToAdd.length(); i++) {
+                            puzzle[row][column+i] = wordToAdd.charAt(i);
+                        }
+                    break;
+
+                    case "Up":
+                        extraInfo.location.x += wordToAdd.length()-1; // Words going up are reversed so start pos is length; fall-through to "Down"
+                    case "Down":
+                        for (int i = 0; i < wordToAdd.length(); i++) {
+                            puzzle[row+i][column] = wordToAdd.charAt(i);
+                        }
+                    break;
+                }
                 puzzleWordsInfo.put(word, extraInfo);
-
-                if ("Left".equals(direction) || "Right".equals(direction)) {
-                    for (int i = 0; i < wordToAdd.length(); i++) {
-                        puzzle[row][column+i] = wordToAdd.charAt(i);
-                    }
-                }
-
-                else { //No need to seperately check "Up" and "Down" again: direction is already checked for invalidness in the switch statement
-                    for (int i = 0; i < wordToAdd.length(); i++) {
-                        puzzle[row+i][column] = wordToAdd.charAt(i);
-                    }
-                }
             }
-            //else System.out.printf("[DEBUG] Attempt: %d; Couldn't add %s to row %d col %d, dir %s\n", attempts, wordToAdd, row, column, extraInfo.direction);
         }
     }
 
     private void generateWordSearchPuzzle() {
-        final String[] directions = {"Left", "Right", "Up", "Down"}; //Basic, no diagonals
-
-        Collections.sort(puzzleWords, new Comparator<String>() { //sort in descending order so biggest words at beginning and easier to place
+        puzzleWords.sort(new Comparator<String>() { //sort in descending order so biggest words at beginning and easier to place
                 public int compare(String x, String y) {
                 return y.length() - x.length();
             }
@@ -111,13 +103,12 @@ public class WordSearchPuzzle {
             charTotal += string.length();
         }
 
-        charTotal *= 1.5f; //multiply by scaling factor
-        int gridDim = Math.max((int)Math.ceil(Math.sqrt(charTotal)), puzzleWords.get(0).length()); //Math.sqrt gets square root of charTotal; Math.ceil rounds result of sqrt up to a whole number
+        int gridDim = Math.max((int)Math.ceil(Math.sqrt(charTotal*1.75f)), puzzleWords.get(0).length()); //Math.ceil rounds result of sqrt up to a whole number
         puzzle = new char[gridDim][gridDim]; // rectangular array
 
         for (int i = 0; i < puzzleWords.size(); i++) {
-            puzzleWords.set(i, puzzleWords.get(i).toUpperCase()); //Make the words all uppercase
-            addWordToPuzzle(puzzleWords.get(i), directions[(int)(Math.random() * directions.length)]);
+            puzzleWords.set(i, puzzleWords.get(i).toLowerCase()); //Make the words all uppercase
+            addWordToPuzzle(puzzleWords.get(i));
         }
 
         // x is row; y is column; fill in the empty slots in wordsearch here
