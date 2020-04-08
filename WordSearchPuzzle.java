@@ -178,7 +178,6 @@ public class WordSearchPuzzle {
             }
             str.append("|\n");
         }
-
         return str.toString();
     }
 

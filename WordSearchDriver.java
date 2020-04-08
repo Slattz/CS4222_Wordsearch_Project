@@ -1,5 +1,4 @@
 //Shane Slattery (19235046)
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class WordSearchDriver {
@@ -11,11 +10,10 @@ public class WordSearchDriver {
     }
 
     public static void ArrayTest1() {
-        final String words = "Animal Crossing New Horizons released March Amazing and Fantastic";
-        ArrayList<String> list = new ArrayList<String>(Arrays.asList(words.split(" ")));
+        final String words = "Sea better than Java besides garbage collection boring";
 
         System.out.print("\n--Instance #1--\nCreating Wordsearch using a list of words.\n");
-        WordSearchPuzzle puz1 = new WordSearchPuzzle(list);
+        WordSearchPuzzle puz1 = new WordSearchPuzzle(Arrays.asList(words.split(" ")));
         
         System.out.print("\nShowing Wordsearch #1 with solutions hidden:\n\n");
         puz1.showWordSearchPuzzle(true);
@@ -29,10 +27,9 @@ public class WordSearchDriver {
 
     public static void ArrayTest2() {
         String words = "Starships were meant to fly Hands up and touch the sky Cant stop cause were so high Lets do this one more time";
-        ArrayList<String> list = new ArrayList<String>(Arrays.asList(words.split(" ")));
 
         System.out.print("\n--Instance #2--\nCreating Wordsearch #2 using a different list of words.\n\n");
-        WordSearchPuzzle puz = new WordSearchPuzzle(list);
+        WordSearchPuzzle puz = new WordSearchPuzzle(Arrays.asList(words.split(" ")));
 
         System.out.print("\nShowing Wordsearch #2 with solutions hidden:\n\n");
         puz.showWordSearchPuzzle(true);
@@ -57,7 +54,7 @@ public class WordSearchDriver {
         System.out.print("\nNow showing Wordsearch #3 with solutions shown:\n\n");
         filepuz1.showWordSearchPuzzle(false);
 
-        System.out.print("\nGetting Wordsearch #3 as grid and printing.\n\n");
+        System.out.print("\nGetting Wordsearch #3 as grid and printing:\n\n");
         System.out.println(Arrays.deepToString(filepuz1.getPuzzleAsGrid()).replace("], ", "]\n").replace("[[", "["));
     }
 
